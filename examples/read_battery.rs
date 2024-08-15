@@ -1,26 +1,48 @@
 use std::sync::Arc;
 
+use renogy::Battery;
 use tokio::sync::Mutex;
 
 
-#[tokio::main]
-async fn main() {
+use clap::Parser;
 
-    let addr = 240;
-    let port_path = "/dev/ttyUSB1";
+#[derive(Debug, Parser)]
+struct Args {
+    #[arg(short, long)]
+    port: String
+}
 
-    let port = match renogy::Port::new(port_path) {
+
+fn open_battery(port: &str, addr: u8) -> Battery {
+    let port = match renogy::Port::new(port) {
         Ok(p) => p,
         Err(e) => {
-            println!("Could not open port {}: {:?}", port_path, e);
+            println!("Could not open port {}: {:?}", port, e);
             std::process::exit(-1);
         }
     };
     let port = Arc::new(Mutex::new(port));
 
-    let battery = renogy::Battery::new(port.clone(), addr);
+    Battery::new(port.clone(), addr)
+}
 
-    println!("Reading...");
-    let state = battery.read_all().await.unwrap();
-    println!("Battery at addr {}: {:?}", addr, state);
+#[tokio::main]
+async fn main() {
+    let args = Args::parse();
+
+    // Read status from two batteries with IDs 246 and 247
+    let battery1 = open_battery(&args.port, 246);
+    let battery2 = open_battery(&args.port, 247);
+
+    println!("Reading 246");
+    match battery1.read_all().await {
+        Ok(state) => println!("State: {:?}", state),
+        Err(e) => println!("Error: {:?}", e),
+    }
+
+    println!("Reading 247");
+    match battery2.read_all().await {
+        Ok(state) => println!("State: {:?}", state),
+        Err(e) => println!("Error: {:?}", e),
+    }
 }
