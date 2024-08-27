@@ -103,7 +103,6 @@ impl Battery {
         const TIMEOUT: Duration = Duration::from_millis(200);
         let mut port = self.port.lock().await;
         port.ctx.set_slave(Slave(self.addr));
-        println!("read_register {}", addr);
 
         std::thread::sleep(Duration::from_millis(10));
         match timeout(TIMEOUT, port.ctx.read_holding_registers(addr, size)).await {
