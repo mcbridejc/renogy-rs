@@ -33,7 +33,7 @@ impl Port {
 }
 
 /// Represents all available battery stats
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, Default)]
 pub struct BatteryState {
     pub current: f64,
     pub voltage: f64,
