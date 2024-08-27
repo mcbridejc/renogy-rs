@@ -136,8 +136,7 @@ impl Battery {
     ///
     /// Current is negative when discharging, positive when charging
     pub async fn current(&self) -> Result<f64> {
-        // This register has opposite endianness of other registers for some reason
-        let raw = i16::swap_bytes(self.read_i16(RegAddr::Current as u16).await?);
+        let raw = self.read_i16(RegAddr::Current as u16).await?;
         Ok(raw as f64 * 0.01)
     }
 
